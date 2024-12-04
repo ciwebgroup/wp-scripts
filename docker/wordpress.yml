@@ -1,0 +1,49 @@
+services:
+  wp_domain:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: advanced-wordpress:latest  # Define the name of the built image
+    container_name: wp_domain
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./php.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./wp-config.php:/var/www/html/wp-config.php:ro
+      - ./www/wp-content/mysql.sql:/data/mysql.sql:ro
+      - ./crons:/crons:ro
+      - ./www/wp-content:/var/www/html/wp-content
+      - ./.htaccess:/var/www/html/.htaccess
+      - ./log:/var/www/log
+    user: "33:33"
+    restart: always
+    environment:
+      - PAGER=more
+      - MEMORY_LIMIT=128M
+      - WORDPRESS_DB_HOST=mysql
+      - WORDPRESS_DB_USER=domain
+      - WORDPRESS_DB_PASSWORD=NkeYW98wB9OHrPC3
+      - WORDPRESS_DB_NAME=wp_domain
+      - WP_HOME=https://www.domain.com
+      - WP_DEBUG=true
+      - WP_CACHE=true
+      - WP_DEBUG_LOG=true
+      - WP_DEBUG_DISPLAY=false
+      - DOMAISCRIPT_DEBUG=true
+    networks:
+      - web
+      - mysql
+    labels:
+      - "ci.groups=website,wordpress"
+      - "traefik.http.routers.wp_domain.middlewares=wordpress-security"
+      - "traefik.http.routers.wp_domain.rule=Host(`domain.com`)"
+      - "traefik.http.routers.wp_domain.tls=true"
+      - "traefik.http.routers.wp_domain.tls.certresolver=lets-encrypt"
+      - "traefik.port=80"
+
+networks:
+  mysql:
+    name: mysql
+    external: true
+  web:
+    name: web
+    external: true

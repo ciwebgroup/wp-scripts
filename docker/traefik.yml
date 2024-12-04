@@ -1,0 +1,79 @@
+networks:
+  web:
+    name: web
+    driver: bridge
+  mysql:
+    name: mysql
+    driver: bridge
+
+services:
+  traefik:
+    image: traefik:v3.2.1
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.dashboard=true" # Enable Traefik dashboard
+      - "--entrypoints.web.address=:80" # Define HTTP entrypoint
+      - "--entrypoints.websecure.address=:443" # Define HTTPS entrypoint
+      - "--certificatesresolvers.lets-encrypt.acme.email=support@ciwebgroup.com" # Email for Let's Encrypt
+      - "--certificatesresolvers.lets-encrypt.acme.storage=/letsencrypt/acme.json" # Storage for Let's Encrypt certificates
+      - "--certificatesresolvers.lets-encrypt.acme.tlsChallenge=true" # Enable TLS challenge (note the case change)
+      - "--entryPoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entryPoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entryPoints.web.http.redirections.entrypoint.permanent=true"
+      - "--experimental.plugins.fail2ban.modulename=github.com/tomMoulard/fail2ban"
+      - "--experimental.plugins.fail2ban.version=v0.8.3"
+      - "--experimental.plugins.coraza-http-wasm-traefik.modulename=github.com/jcchavezs/coraza-http-wasm-traefik"
+      - "--experimental.plugins.coraza-http-wasm-traefik.version=v0.2.2"
+      - "--providers.docker=true" # Enable Docker provider
+      - "--providers.docker.watch=true" # Watch Docker for changes
+      - "--providers.docker.network=web" # Docker network for Traefik
+    ports:
+      - "80:80"      # HTTP port
+      - "443:443"    # HTTPS port
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./acme.json:/letsencrypt/acme.json" # Volume for Let's Encrypt certificates
+#      - "./traefik.yml:/traefik.yml"
+    networks:
+      - web
+      - mysql
+    labels:
+      - "traefik.enable=true"
+
+      # Middleware for blocking XML-RPC requests (floods)
+      - "traefik.http.middlewares.block-xmlrpc.redirectregex.regex=/xmlrpc.php"
+      - "traefik.http.middlewares.block-xmlrpc.redirectregex.replacement=/403.html"
+      - "traefik.http.middlewares.block-xmlrpc.redirectregex.permanent=true"
+
+      # Middleware for blocking SQL file requests
+      - "traefik.http.middlewares.block-sql-files.redirectregex.regex=.*\\.sql$"
+      - "traefik.http.middlewares.block-sql-files.redirectregex.replacement=/403.html"
+      - "traefik.http.middlewares.block-sql-files.redirectregex.permanent=true"
+
+      # Middleware to enforce HTTPS via redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # Middleware to force www where we need to
+      - "traefik.http.middlewares.force-www-redirect.redirectregex.regex=^https?://(?:www\\.)?([^/]+)(.*)"
+      - "traefik.http.middlewares.force-www-redirect.redirectregex.replacement=https://www.$${1}$${2}"
+      - "traefik.http.middlewares.force-www-redirect.redirectregex.permanent=true"
+
+      # Middleware for Basic Authentication on the Dashboard
+      - "traefik.http.middlewares.simpleAuth.basicAuth.users=root:$$apr1$$Wua1flXi$$tjMaYUTovxoMH7Toco52o0"
+
+      # Middware Chains
+      - "traefik.http.middlewares.wordpress-security.chain.middlewares=redirect-to-https,block-xmlrpc,block-sql-files"
+
+      # Default HTTP Router for all HTTP traffic - Redirect to HTTPS
+      - "traefik.http.routers.universal.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.universal.entrypoints=web"
+      - "traefik.http.routers.universal.middlewares=redirect-to-https"
+      - "traefik.http.routers.security.priority=1000"
+
+      # Router for Traefik API Dashboard (exempt from redirect)
+      - "traefik.http.routers.api.rule=Host(`monitor.wp0.ciwgserver.com`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.middlewares=simpleAuth"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.api.tls.certresolver=lets-encrypt"
