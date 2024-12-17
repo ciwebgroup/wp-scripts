@@ -19,6 +19,8 @@ define( 'SNOWFLAKE_DENSITY_MODIFIER', 2 ); // Degrees per additional snowflake
 define( 'WEATHER_CACHE_KEY', 'current_weather' ); // Option key for caching weather
 define( 'WEATHER_CACHE_DURATION', 86400 ); // Cache duration (24 hours in seconds)
 define( 'DEFAULT_CITY', 'Chicago,US' ); // Default city if no location is detected
+define( 'SNOW_START_DATE', 'December 1');
+define( 'SNOW_END_DATE', 'January 2');
 
 /** Fetch the website or user's city */
 function get_website_or_user_city() {
@@ -80,11 +82,6 @@ function get_cached_temperature() {
 function add_snowflakes_to_footer() {
     $currentTemp = get_cached_temperature();
 
-    // Do not display snowflakes if temperature is above the threshold
-    if ( $currentTemp > TEMPERATURE_MINIMUM ) {
-        return;
-    }
-
     // Calculate snowflake density
     $densityModifier = max( 0, floor( ( TEMPERATURE_MINIMUM - $currentTemp ) / SNOWFLAKE_DENSITY_MODIFIER ) );
     $snowflakeCount = SNOWFLAKE_BASE_COUNT + $densityModifier;
@@ -121,12 +118,25 @@ function add_snowflakes_to_footer() {
     }
     </style>
     <div class="snowflakes" aria-hidden="true">
-      <?php for ( $i = 0; $i < $snowflakeCount; $i++ ): ?>
-        <div class="snowflake" style="left: <?php echo rand(1, 100); ?>%; animation-delay: <?php echo rand(0, 10); ?>s;">
-          <div class="inner">❅</div>
+    <?php for ( $i = 0; $i < $snowflakeCount; $i++ ): ?>
+        <?php
+            $leftPosition = rand(1, 100); // Random horizontal position
+            $animationDelay = rand(0, 10) / 10; // Random delay between 0 and 1 second
+            $fallDuration = rand(7, 15); // Random fall duration between 7s and 15s
+            $shakeDuration = rand(3, 6); // Random shake duration between 3s and 6s
+        ?>
+        <div 
+            class="snowflake" 
+            style="left: <?php echo $leftPosition; ?>%; 
+                   animation-delay: <?php echo $animationDelay; ?>s; 
+                   animation-duration: <?php echo $shakeDuration; ?>s;">
+            <div class="inner" 
+                style="animation-delay: <?php echo $animationDelay; ?>s; 
+                       animation-duration: <?php echo $fallDuration; ?>s;">
+                ❅
+            </div>
         </div>
-      <?php endfor; ?>
-    </div>
+    <?php endfor; ?>
     <?php
 }
 
@@ -134,7 +144,11 @@ function add_snowflakes_to_footer() {
 function register_snowflakes_action() {
     $currentTemp = get_cached_temperature();
 
-    if ( $currentTemp <= TEMPERATURE_MINIMUM ) {
+    $start_date = strtotime( SNOW_START_DATE ); // Start date: Dec 1st
+    $end_date   = strtotime( SNOW_END_DATE ); // End date: Jan 2nd (inclusive)
+    $current_date = time(); // Current timestamp
+
+    if ( $current_date < $start_date || $current_date > $end_date ) {
         add_action( 'wp_footer', 'add_snowflakes_to_footer' );
     }
 }
