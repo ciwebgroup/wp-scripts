@@ -13,7 +13,7 @@ Add security middleware to each and every server's traefik configuration, and to
 - Delete all of the old labels
 - Paste all labels from `traefik.yml` in this repository
 - Update the host # from wp0 to the correct host
-  - - "traefik.http.routers.api.rule=Host(`monitor.wp#.ciwgserver.com`)"
+  - - "traefik.http.routers.api.rule=Host(\`monitor.wp#.ciwgserver.com\`)"
 - Save and Exit
 - `dc down && dc up -d`
 - Configure each domain
