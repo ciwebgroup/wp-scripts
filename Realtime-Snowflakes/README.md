@@ -6,8 +6,8 @@ Here's the **fancy README** for your plugin **"Realtime Snowflakes"**! 🎉
 
 **Plugin Name:** Realtime Snowflakes  
 **Description:** Bring the magic of winter to your WordPress website with dynamically falling snowflakes that respond to **live weather conditions**!  
-**Version:** 1.4  
-**Author:** Your Name  
+**Version:** 1.0  
+**Author:** Chris Heney
 **Development Time:** Supercharged with the power of **OpenAI** in record time (but still sprinkled with love and care)!  
 
 ---
@@ -53,7 +53,9 @@ Here's the **fancy README** for your plugin **"Realtime Snowflakes"**! 🎉
    - `WEATHER_CACHE_DURATION` → Cache duration (24 hours).  
    - `DEFAULT_CITY` → Fallback city.
 
+
 ---
+
 
 ## ⚙️ **How It Works**
 1. **Live Weather Fetch**:  
@@ -116,12 +118,18 @@ The development process was powered by creativity, innovation, and an extra spri
 ---
 
 ## 🎉 **Credits**
-- Built with ❤️ by **Your Name**.  
+- Built with ❤️ by **Chris Heney**.  
 - Weather data provided by **[OpenWeatherMap](https://openweathermap.org/api)**.  
 - Powered by **OpenAI** for making development a breeze!  
 
 ---
 
 Enjoy your **dynamic snowfall**! Stay warm and happy coding. ⛄❄️  
+
+---
+
+##  TODO 
+
+Add "city detection" by scanning the nav menu using OpenAI's API if the city doesn't exist (just like we do for schema).
 
 ---
