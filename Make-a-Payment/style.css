@@ -1,0 +1,86 @@
+#payment-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fbfbfb;
+}
+#payment-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+#payment-form .form-control.row {
+    display: flex;
+    gap: 1em;
+    width: 100%;
+}
+#payment-form .form-control input {
+    display: block;
+    width: 100%;
+}
+#payment-form .invalid,
+#payment-form .form-control span.invalid {
+    border-color: red !important;
+    color: #f00;
+}
+#payment-form .form-control span.invalid {
+    font-size: 0.85rem;
+    font-weight: bold;
+    font-family: arial;
+    line-height: 1.15rem;
+    display: block;
+}
+#payment-form .form-control input {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 3px;
+}
+#payment-form button {
+    font-family: 'lovelo Black';
+    padding: 0.5em;
+    border: none;
+    border-radius: 3px;
+    background-color: #ff3;
+    color: #000;
+    cursor: pointer;
+}
+#payment-form button:disabled {
+    background-color: #ccc;
+    color: #666;
+}
+#payment-form button:hover {
+    background-color: #ee3;
+}
+#payment-form .success-message h2 {
+    color: #0a0;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Overlay and Spinner */
+#payment-form .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+#payment-form .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #000;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
